@@ -26,9 +26,16 @@ final class GaameScene: SKScene {
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
-      let rotate = SKAction.rotate(byAngle: 90, duration: 0.5)
+      let newSprite = SKSpriteNode()
+      newSprite.size = CGSize(width: 50, height: 50)
+      newSprite.color = .systemMint
+      newSprite.position = touch.location(in: self)
       
-      square.run(rotate)
+      newSprite.physicsBody = SKPhysicsBody(rectangleOf: newSprite.size)
+      newSprite.physicsBody?.isDynamic = true
+      newSprite.physicsBody?.affectedByGravity = true
+      
+      addChild(newSprite)
     }
   }
   
