@@ -20,13 +20,18 @@ final class GaameScene: SKScene {
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
+      let rotate = SKAction.rotate(byAngle: 90, duration: 0.5)
+      
+      square.run(rotate)
+    }
+  }
+  
+  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
       let positinon = touch.location(in: self)
       
       let move = SKAction.move(to: positinon, duration: 0.5)
-      let rotate = SKAction.rotate(byAngle: 90, duration: 0.5)
-      
-      let sequence = SKAction.sequence([move, rotate])
-      square.run(sequence)
+      square.run(move)
     }
   }
 }
