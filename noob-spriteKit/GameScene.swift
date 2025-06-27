@@ -22,6 +22,20 @@ final class GaameScene: SKScene {
     square.physicsBody?.affectedByGravity = true
     
     addChild(square)
+    createPlatform()
+    
+  }
+  
+  func createPlatform() {
+    let platform = SKSpriteNode()
+    platform.size = CGSize(width: UIScreen.main.bounds.width, height: 20)
+    platform.position = CGPoint(x: 200, y: 0)
+    platform.color = .yellow
+    
+    platform.physicsBody = SKPhysicsBody(rectangleOf: platform.size)
+    platform.physicsBody?.isDynamic = false
+    platform.physicsBody?.affectedByGravity = false
+    addChild(platform)
   }
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
