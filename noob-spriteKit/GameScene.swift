@@ -11,9 +11,15 @@ final class GaameScene: SKScene {
   let square = SKSpriteNode()
   
   override func didMove(to view: SKView) {
+    self.physicsWorld.gravity = CGVector(dx: 0.0, dy: -1.8)
+    
     square.size = CGSize(width: 20, height: 20)
     square.color = .systemPink
-    square.position = CGPoint(x: 100, y: 100)
+    square.position = CGPoint(x: 100, y: 400)
+    
+    square.physicsBody = SKPhysicsBody(rectangleOf: square.size)
+    square.physicsBody?.isDynamic = true
+    square.physicsBody?.affectedByGravity = true
     
     addChild(square)
   }
