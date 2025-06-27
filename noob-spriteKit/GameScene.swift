@@ -23,7 +23,21 @@ final class GaameScene: SKScene {
     
     addChild(square)
     createPlatform()
-    
+  }
+  
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      generateSpites(touch: touch)
+    }
+  }
+  
+  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      let positinon = touch.location(in: self)
+      
+      let move = SKAction.move(to: positinon, duration: 0.5)
+      square.run(move)
+    }
   }
   
   func createPlatform() {
@@ -38,27 +52,16 @@ final class GaameScene: SKScene {
     addChild(platform)
   }
   
-  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    for touch in touches {
-      let newSprite = SKSpriteNode()
-      newSprite.size = CGSize(width: 50, height: 50)
-      newSprite.color = .systemMint
-      newSprite.position = touch.location(in: self)
-      
-      newSprite.physicsBody = SKPhysicsBody(rectangleOf: newSprite.size)
-      newSprite.physicsBody?.isDynamic = true
-      newSprite.physicsBody?.affectedByGravity = true
-      
-      addChild(newSprite)
-    }
-  }
-  
-  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    for touch in touches {
-      let positinon = touch.location(in: self)
-      
-      let move = SKAction.move(to: positinon, duration: 0.5)
-      square.run(move)
-    }
+  func generateSpites(touch: UITouch) {
+    let newSprite = SKSpriteNode()
+    newSprite.size = CGSize(width: 50, height: 50)
+    newSprite.color = .systemMint
+    newSprite.position = touch.location(in: self)
+    
+    newSprite.physicsBody = SKPhysicsBody(rectangleOf: newSprite.size)
+    newSprite.physicsBody?.isDynamic = true
+    newSprite.physicsBody?.affectedByGravity = true
+    
+    addChild(newSprite)
   }
 }
