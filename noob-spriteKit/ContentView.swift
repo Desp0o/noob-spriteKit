@@ -10,6 +10,7 @@ import SpriteKit
 
 
 struct ContentView: View {
+  @StateObject private var vm = ShooterScene()
   let width = UIScreen.main.bounds.width
   let height = UIScreen.main.bounds.height
   
@@ -24,6 +25,7 @@ struct ContentView: View {
   
   var body: some View {
     VStack {
+      
       SpriteView(scene: scene)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
@@ -42,8 +44,11 @@ struct PhysicsCategory {
   static let square: UInt32 = 4
 }
 
-final class ShooterScene: SKScene, SKPhysicsContactDelegate {
+import Combine
+final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
   let square = SKSpriteNode()
+  let scoreLabel = SKLabelNode()
+  var score = 0
   
   let screenWidth: CGFloat = UIScreen.main.bounds.width
   let screenHeight: CGFloat = UIScreen.main.bounds.height
@@ -54,6 +59,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
     
     createSquareSprite()
     spawnEnemy()
+    setupScore()
   }
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -67,7 +73,9 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
   }
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    shootBullets()
+    if square.parent != nil {
+      shootBullets()
+    }
   }
   
   func createSquareSprite() {
@@ -77,11 +85,11 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
     square.position = CGPoint(x: screenWidth / 2, y: CGFloat(UIScreen.main.bounds.minY + 40))
     
     square.physicsBody = SKPhysicsBody(rectangleOf: square.frame.size)
-    square.physicsBody?.isDynamic = false
+    square.physicsBody?.isDynamic = true
     square.physicsBody?.affectedByGravity = false
     square.physicsBody?.usesPreciseCollisionDetection = true
     square.physicsBody?.categoryBitMask = PhysicsCategory.square
-    square.physicsBody?.contactTestBitMask = PhysicsCategory.bullet
+    square.physicsBody?.contactTestBitMask = PhysicsCategory.enemy
     
     addChild(square)
   }
@@ -126,7 +134,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
     enemy.physicsBody?.isDynamic = true
     enemy.physicsBody?.usesPreciseCollisionDetection = true
     enemy.physicsBody?.categoryBitMask = PhysicsCategory.enemy
-    enemy.physicsBody?.contactTestBitMask = PhysicsCategory.bullet
+    enemy.physicsBody?.contactTestBitMask = PhysicsCategory.bullet | PhysicsCategory.square
     
     let move = SKAction.move(by: CGVector(dx: 0, dy: -800), duration: 2)
     let remove = SKAction.removeFromParent()
@@ -136,7 +144,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
     
     addChild(enemy)
     
-    //    removeAction(forKey: "spawningEnemies")
+    //        removeAction(forKey: "spawningEnemies")
   }
   
   func spawnEnemy() {
@@ -151,12 +159,32 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate {
     run(repeatForever, withKey: "spawnEnemy")
   }
   
+  func setupScore() {
+    scoreLabel.text = "Score: \(score)"
+    scoreLabel.fontColor = .yellow
+    scoreLabel.fontName = "Helvetica-Bold"
+    scoreLabel.fontSize = 20
+    scoreLabel.position = CGPoint(x: UIScreen.main.bounds.maxX - 70, y: UIScreen.main.bounds.maxY - 50)
+    
+    addChild(scoreLabel)
+  }
+  
   func didBegin(_ contact: SKPhysicsContact) {
     let collisionObject = contact.bodyA.categoryBitMask == PhysicsCategory.bullet ? contact.bodyB : contact.bodyA
     
     if collisionObject.categoryBitMask == PhysicsCategory.enemy {
+      score += 1
+      scoreLabel.text = "Score: \(score)"
       contact.bodyA.node?.removeFromParent()
       contact.bodyB.node?.removeFromParent()
+    }
+    
+    let collisionSquare = contact.bodyA.categoryBitMask == PhysicsCategory.square ? contact.bodyA : contact.bodyB
+    
+    if collisionSquare.categoryBitMask == PhysicsCategory.square {
+      contact.bodyA.node?.removeFromParent()
+      contact.bodyB.node?.removeFromParent()
+      removeAction(forKey: "spawnEnemy")
     }
   }
 }
