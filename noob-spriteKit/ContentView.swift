@@ -77,6 +77,14 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     if square.parent != nil {
       shootBullets()
     }
+    
+    guard let touch = touches.first else { return }
+    let location = touch.location(in: self)
+    let nodeAtPoint = atPoint(location)
+    if nodeAtPoint.name == "restartButton" {
+      restartGame()
+      return
+    }
   }
   
   func didBegin(_ contact: SKPhysicsContact) {
@@ -106,7 +114,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     square.position = CGPoint(x: screenWidth / 2, y: CGFloat(UIScreen.main.bounds.minY + 40))
     
     square.physicsBody = SKPhysicsBody(rectangleOf: square.frame.size)
-    square.physicsBody?.isDynamic = true
+    square.physicsBody?.isDynamic = false
     square.physicsBody?.affectedByGravity = false
     square.physicsBody?.usesPreciseCollisionDetection = true
     square.physicsBody?.categoryBitMask = PhysicsCategory.square
@@ -157,7 +165,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     enemy.physicsBody?.categoryBitMask = PhysicsCategory.enemy
     enemy.physicsBody?.contactTestBitMask = PhysicsCategory.bullet | PhysicsCategory.square
     
-    let move = SKAction.move(by: CGVector(dx: 0, dy: -800), duration: 2)
+    let move = SKAction.move(by: CGVector(dx: 0, dy: -800), duration: 3)
     let remove = SKAction.removeFromParent()
     let sequence = SKAction.sequence([move, remove])
     
@@ -185,7 +193,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     scoreLabel.fontColor = .yellow
     scoreLabel.fontName = "Helvetica-Bold"
     scoreLabel.fontSize = 20
-    scoreLabel.position = CGPoint(x: UIScreen.main.bounds.maxX - 70, y: UIScreen.main.bounds.maxY - 50)
+    scoreLabel.position = CGPoint(x: UIScreen.main.bounds.maxX - 70, y: UIScreen.main.bounds.maxY - 60)
     
     addChild(scoreLabel)
   }
@@ -198,6 +206,27 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     gameOverLabel.position = CGPoint(x: screenWidth / 2, y: screenHeight / 2)
     
     addChild(gameOverLabel)
+    
+    showRestartButton()
+  }
+  
+  func restartGame() {
+    removeAllChildren()
+    removeAllActions()
+    
+    createSquareSprite()
+    spawnEnemy()
+    setupScore()
+  }
+  
+  func showRestartButton() {
+    let restartButton = SKLabelNode(text: "Restart")
+    restartButton.name = "restartButton"
+    restartButton.fontSize = 30
+    restartButton.fontColor = .white
+    restartButton.position = CGPoint(x: screenWidth / 2, y: screenHeight / 2 - 40)
+    
+    addChild(restartButton)
   }
 }
 
