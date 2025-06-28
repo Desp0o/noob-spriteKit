@@ -48,6 +48,7 @@ import Combine
 final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
   let square = SKSpriteNode()
   let scoreLabel = SKLabelNode()
+  let gameOverLabel = SKLabelNode()
   var score = 0
   
   let screenWidth: CGFloat = UIScreen.main.bounds.width
@@ -75,6 +76,26 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     if square.parent != nil {
       shootBullets()
+    }
+  }
+  
+  func didBegin(_ contact: SKPhysicsContact) {
+    let collisionObject = contact.bodyA.categoryBitMask == PhysicsCategory.bullet ? contact.bodyB : contact.bodyA
+    
+    if collisionObject.categoryBitMask == PhysicsCategory.enemy {
+      score += 1
+      scoreLabel.text = "Score: \(score)"
+      contact.bodyA.node?.removeFromParent()
+      contact.bodyB.node?.removeFromParent()
+    }
+    
+    let collisionSquare = contact.bodyA.categoryBitMask == PhysicsCategory.square ? contact.bodyA : contact.bodyB
+    
+    if collisionSquare.categoryBitMask == PhysicsCategory.square {
+      contact.bodyA.node?.removeFromParent()
+      contact.bodyB.node?.removeFromParent()
+      removeAction(forKey: "spawnEnemy")
+      gameOver()
     }
   }
   
@@ -169,23 +190,14 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     addChild(scoreLabel)
   }
   
-  func didBegin(_ contact: SKPhysicsContact) {
-    let collisionObject = contact.bodyA.categoryBitMask == PhysicsCategory.bullet ? contact.bodyB : contact.bodyA
+  func gameOver() {
+    gameOverLabel.fontColor = .red
+    gameOverLabel.fontName = "Helvetica-Bold"
+    gameOverLabel.fontSize = 30
+    gameOverLabel.text = "Game Over"
+    gameOverLabel.position = CGPoint(x: screenWidth / 2, y: screenHeight / 2)
     
-    if collisionObject.categoryBitMask == PhysicsCategory.enemy {
-      score += 1
-      scoreLabel.text = "Score: \(score)"
-      contact.bodyA.node?.removeFromParent()
-      contact.bodyB.node?.removeFromParent()
-    }
-    
-    let collisionSquare = contact.bodyA.categoryBitMask == PhysicsCategory.square ? contact.bodyA : contact.bodyB
-    
-    if collisionSquare.categoryBitMask == PhysicsCategory.square {
-      contact.bodyA.node?.removeFromParent()
-      contact.bodyB.node?.removeFromParent()
-      removeAction(forKey: "spawnEnemy")
-    }
+    addChild(gameOverLabel)
   }
 }
 
