@@ -46,6 +46,7 @@ final class ShooterScene: SKScene {
     self.physicsWorld.gravity = CGVector(dx: 0, dy: -1)
     
     createSquareSprite()
+    spawnEnemy()
   }
   
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -79,6 +80,7 @@ final class ShooterScene: SKScene {
   
   func shootBullets() {
     let bullet = SKShapeNode(circleOfRadius: 10)
+    bullet.name = "bullet"
     bullet.fillColor = .red
     bullet.strokeColor = .yellow
     bullet.position = CGPoint(x: square.position.x, y: square.position.y + 20)
@@ -96,6 +98,41 @@ final class ShooterScene: SKScene {
     bullet.run(sequence)
     
     addChild(bullet)
+  }
+  
+  func generateEnemies() {
+    let minX = UIScreen.main.bounds.minX
+    let maxX = UIScreen.main.bounds.maxX
+    let randomX = CGFloat.random(in: minX...maxX)
+    
+    let enemy = SKSpriteNode()
+    
+    enemy.size = CGSize(width: 30, height: 30)
+    enemy.color = .blue
+    enemy.position = CGPoint(x: randomX, y: UIScreen.main.bounds.maxY - 20)
+    enemy.name = "enemy"
+    
+    let move = SKAction.move(by: CGVector(dx: 0, dy: -800), duration: 2)
+    let remove = SKAction.removeFromParent()
+    let sequence = SKAction.sequence([move, remove])
+    
+    enemy.run(sequence)
+    
+    addChild(enemy)
+    
+//    removeAction(forKey: "spawningEnemies")
+  }
+  
+  func spawnEnemy() {
+    let spawn = SKAction.run { [weak self] in
+      self?.generateEnemies()
+    }
+    
+    let wait = SKAction.wait(forDuration: 1)
+    let sequence = SKAction.sequence([spawn, wait])
+    let repeatForever = SKAction.repeatForever(sequence)
+    
+    run(repeatForever, withKey: "spawnEnemy")
   }
 }
 
