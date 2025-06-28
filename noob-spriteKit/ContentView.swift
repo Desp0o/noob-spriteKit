@@ -207,6 +207,7 @@ final class ShooterScene: SKScene, SKPhysicsContactDelegate, ObservableObject {
     
     addChild(gameOverLabel)
     
+    score = 0
     showRestartButton()
   }
   
